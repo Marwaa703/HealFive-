@@ -4,13 +4,22 @@
  *
  * @package WordPress
  * @subpackage Twenty_Nineteen
- * @since 1.0.0
+ * @since Twenty Nineteen 1.0
  */
 
-if ( (bool) get_the_author_meta( 'description' ) ) : ?>
+if ( (bool) get_the_author_meta( 'description' ) ) :
+	?>
 <div class="author-bio">
 	<h2 class="author-title">
-		<span class="author-heading"><?php echo esc_html( sprintf( __( 'Published by %s', 'twentynineteen' ), get_the_author() ) ); ?></span>
+		<span class="author-heading">
+			<?php
+			printf(
+				/* translators: %s: Post author. */
+				__( 'Published by %s', 'twentynineteen' ),
+				esc_html( get_the_author() )
+			);
+			?>
+		</span>
 	</h2>
 	<p class="author-description">
 		<?php the_author_meta( 'description' ); ?>
@@ -19,4 +28,5 @@ if ( (bool) get_the_author_meta( 'description' ) ) : ?>
 		</a>
 	</p><!-- .author-description -->
 </div><!-- .author-bio -->
-<?php endif; ?>
+	<?php
+endif;

@@ -15,7 +15,7 @@ blockquote {
 	cite {
 		font-size: $font__size-xs;
 		font-style: normal;
-		font-family: $font__heading;
+		@include font-family( $font__heading );
 	}
 }
 
@@ -58,5 +58,6 @@ a {
 
 	&:focus {
 		text-decoration: underline;
+		text-decoration-thickness: 2px;
 	}
 }
