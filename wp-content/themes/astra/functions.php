@@ -668,21 +668,20 @@ function store_forminator_form_data() {
 add_action('after_setup_theme', 'store_forminator_form_data');
 */
 /////////////////////////////////////////////////////////////////
-add_shortcode('mas', 'massage');
+// add_shortcode('mas', 'massage');
 
-function massage() {
-    global $wpdb;
-	  $table = $wpdb->prefix .'user';
-	$nurse_id = $wpdb->get_var($wpdb->prepare("SELECT nurse_id FROM $table WHERE ID = %d", $_GET['ID']));
-    // Shortcode attributes and default values
-            $url = 'https://dev-healfive.pantheonsite.io/make-appointment/?nurse_id='.$nurse_id.'&subject=Have+a+question+to+you&message=Lorem+Ipsum+is+simply+dummy+text+of+the+printing+and+typesetting+industry.&';
+// function massage() {
+//     global $wpdb;
+// 	  $table = $wpdb->prefix .'users';
+// 	$nurse_id = $wpdb->get_var($wpdb->prepare("select nurse_id from $table where ID = %d", $_GET['ID']));
+//     // Shortcode attributes and default values
+//             $url = 'https://dev-healfive.pantheonsite.io/make-appointment/?nurse_id='.$nurse_id.'&subject=Have+a+question+to+you&message=Lorem+Ipsum+is+simply+dummy+text+of+the+printing+and+typesetting+industry.&';
 
-    // Generate button HTML
-    $button_html = '<a href="' . esc_url($url) . '" name="Message_button" class="Message_button">Reserve</a>';
+
 
     // Return the HTML
-    return $button_html;
-}
+//     return $button_html;
+// }
 ///////////////////////////////////////////////
 // add_shortcode('init', 'custom_bettermassage_chat_users');
 
@@ -722,7 +721,7 @@ $args = array(
     $id = $user->ID;
     $id = (int) $id;
     $data = get_user_meta($id);
-		
+		print_r($data);
 	$url=$data['img'][0];
 		
 // 	echo "<img src='https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/$id/$url'>";	
