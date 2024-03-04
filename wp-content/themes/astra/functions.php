@@ -709,11 +709,11 @@ function showDoctor(){
 ob_start();
 	global $wpdb;
 $args = array(
-    'role'    => 'um_nurse'
+	'role'    => 'nurse'
 );
 	$users = get_users( $args );
 //    print_r($users);
-	print_r($users);
+// 	print_r($users);
    echo'<div class="e-con-inner"style="display: flex;">';
 
 	foreach ($users as $user) {
@@ -721,13 +721,13 @@ $args = array(
     $id = $user->ID;
     $id = (int) $id;
     $data = get_user_meta($id);
-		print_r($data);
-	$url=$data['img'][0];
+// 		print_r($data);
+	$url=$data['Img'][0];
 		
 // 	echo "<img src='https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/$id/$url'>";	
 //     $name = isset($data['user_nicename'][0]) ? $name : ''; // Corrected spelling
-    $experince = isset($data['experince'][0]) ? $data['experince'][0] : ''; // Corrected spelling
-    $Price = isset($data['Price'][0]) ? $data['Price'][0] : ''; // Corrected spelling
+    $experince = isset($data['experience'][0]) ? $data['experience'][0] : ''; // Corrected spelling
+    $Price = isset($data['priCe'][0]) ? $data['priCe'][0] : ''; // Corrected spelling
 		um_fetch_user($id);
     $img = um_get_avatar_uri(um_profile('profile_photo'),100);
 //       echo "<img src='$img'>";
