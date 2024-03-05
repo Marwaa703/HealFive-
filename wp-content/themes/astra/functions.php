@@ -361,312 +361,10 @@ function select_nurse(){
         
         
         
- /////////////////Nurse_DashBorad_short_code//////////////////////
- 
-  /////////////////////// Current Posts//////////////////////
- /* 
-function display_current_from_category_shortcode($atts) {
-    $atts = shortcode_atts(
-        array(
-            'category' => 'current', 
-            'count' => 2,     
-        ),
-        $atts,
-        'display_current_offer'
-    );
 
-    $args = array(
-        'category_name' => $atts['category'],
-        'posts_per_page' => $atts['count'],
-    );
-
-    $posts_query = new WP_Query($args);
-
-    $output = '';
-    $post_number = 1;
-    if ($posts_query->have_posts()) {
-        while ($posts_query->have_posts()) {
-            $posts_query->the_post();
-            $post_id = get_the_ID(); 
-            $output .= '<div style="background-color: #00D084; color: white; padding: 20px; margin-bottom: 20px; border-radius: 12px;">';
-            $output .= '<h4 style="text-align: center;">Offer ' . $post_number . '</h4>'; 
-            $output .= '<p>' . get_the_content() . '</p>'; 
-            // Buttons
-            $output .= '<form method="post" action="">';
-            $output .= '<input type="hidden" name="post_id" value="' . $post_id . '">'; 
-            $output .= '<button type="submit" name="move_to_upcoming" style="background-color: green; color: white;">Accept</button>';
-            $output .= '<button type="submit" name="delete_post" style="background-color: red; color: white;">Decline</button>';
-            $output .= '</form>';
-            $output .= '</div>'; 
-            $post_number++;
-        }
-    } else {
-        $output .= '<p style="color: #00D084; text-align: center;">No offers found.</p>';
-    }
-
-    // Handle actions
-    if (isset($_POST['move_to_upcoming'])) {
-        $post_id = $_POST['post_id'];
-        // Move post to 'upcoming' category
-        wp_set_post_categories($post_id, get_cat_ID('upcoming'), true);
-        // Remove post from 'current' category
-        wp_remove_object_terms($post_id, 'current', 'category');
-    }
-    if (isset($_POST['delete_post'])) {
-        $post_id = $_POST['post_id'];
-        wp_delete_post($post_id, true);
-    }
-
-    wp_reset_postdata();
-
-    return $output;
-}
-add_shortcode('display_current_offer', 'display_current_from_category_shortcode');
-*/
-
-function display_current_from_category_shortcode($atts) {
-    $atts = shortcode_atts(
-        array(
-            'category' => 'current', 
-            'count' => 2,     
-        ),
-        $atts,
-        'display_current_offer'
-    );
-
-    $args = array(
-        'category_name' => $atts['category'],
-        'posts_per_page' => $atts['count'],
-    );
-
-    $posts_query = new WP_Query($args);
-
-    $output = '';
-    $post_number = 1;
-    if ($posts_query->have_posts()) {
-        while ($posts_query->have_posts()) {
-            $posts_query->the_post();
-            $post_id = get_the_ID(); 
-            $output .= '<div style="background-color: #00D084; color: white; padding: 20px; margin-bottom: 20px; border-radius: 12px;">';
-            $output .= '<h4 style="text-align: center;">Offer ' . $post_number . '</h4>'; 
-            $output .= '<p>' . get_the_content() . '</p>'; 
-            // Retrieve and display Forminator form data
-            $output .= get_forminator_form_data($post_id);
-            // Buttons
-            $output .= '<form method="post" action="">';
-            $output .= '<input type="hidden" name="post_id" value="' . $post_id . '">'; 
-            $output .= '<button type="submit" name="move_to_upcoming" style="background-color: green; color: white;">Accept</button>';
-            $output .= '<button type="submit" name="delete_post" style="background-color: red; color: white;">Decline</button>';
-            $output .= '</form>';
-            $output .= '</div>'; 
-            $post_number++;
-        }
-    } else {
-        $output .= '<p style="color: #00D084; text-align: center;">No offers found.</p>';
-    }
-
-    // Handle actions
-    if (isset($_POST['move_to_upcoming'])) {
-        $post_id = $_POST['post_id'];
-       
-        wp_set_post_categories($post_id, get_cat_ID('upcoming'), true);
-       
-        wp_remove_object_terms($post_id, 'current', 'category');
-    }
-    if (isset($_POST['delete_post'])) {
-        $post_id = $_POST['post_id'];
-        wp_delete_post($post_id, true);
-    }
-
-    wp_reset_postdata();
-
-    return $output;
-}
-add_shortcode('display_current_offer', 'display_current_from_category_shortcode');
-
-
-//get_data_from_forms
-function get_forminator_form_data($post_id) {
-    // Retrieve form data
-    $form_data_1076 = do_shortcode('[forminator_entry field_ids="all" form_id="1076" entry_id="' . $post_id . '"]');
-    $form_data_802 = do_shortcode('[forminator_entry field_ids="all" form_id="802" entry_id="' . $post_id . '"]');
-    
-    // Process and format form data
-    $formatted_data_1076 = process_forminator_form_data($form_data_1076);
-    $formatted_data_802 = process_forminator_form_data($form_data_802);
-    
-    // Display form data
-    $output = '<h5>Form Data for Form 1076:</h5>' . $formatted_data_1076;
-    $output .= '<h5>Form Data for Form 802:</h5>' . $formatted_data_802;
-    
-    return $output;
-}
-
-function process_forminator_form_data($form_data) {
-       $formatted_data = '';
-    if (!empty($form_data)) {
-        foreach ($form_data as $field) {
-            $formatted_data .= $field['field_label'] . ': ' . $field['field_value'] . '<br>';
-        }
-    } else {
-        $formatted_data = 'No data available';
-    }
-    return $formatted_data;
-}
-
-
-
-
-/////////////////////// Upcoming Posts///////////////////////
-
-function display_upcoming_from_category_shortcode($atts) {
-    $atts = shortcode_atts(
-        array(
-            'category' => 'upcoming',
-            'count' => 2,
-        ),
-        $atts,
-        'display_upcoming_from_category'
-    );
-
-    $args = array(
-        'category_name' => $atts['category'],
-        'posts_per_page' => $atts['count'],
-    );
-
-    $posts_query = new WP_Query($args);
-
-    $output = '';
-    $post_number = 1;
-    if ($posts_query->have_posts()) {
-        while ($posts_query->have_posts()) {
-            $posts_query->the_post();
-            $post_id = get_the_ID();
-
-            $output .= '<div style="background-color: #00D084; color: white; padding: 20px; margin-bottom: 20px; border-radius: 12px;">';
-            $output .= '<h4 style="text-align: center;">Upcoming Appointment ' . $post_number . '</h4>';
-            $output .= '<p>' . get_the_content() . '</p>';
-            // Button
-           $output .= '<form method="post" action="' . esc_url($_SERVER['REQUEST_URI']) . '">';
-
-            $output .= '<input type="hidden" name="post_id" value="' . $post_id . '">';
-            $output .= '<button type="submit" name="move_to_previous" style="background-color: blue; color: white; padding: 15px;">Done</button>';
-            $output .= '</form>';
-            $output .= '</div>';
-            $post_number++;
-        }
-    } else {
-        $output .= '<p style="color: #00D084; text-align: center;">No upcoming appointments found.</p>';
-    }
-
- // Handle action
-if (isset($_POST['move_to_previous'])) {
-    $post_id = $_POST['post_id'];
-       wp_set_post_categories($post_id, get_cat_ID('pervious'), true);
-       wp_remove_object_terms($post_id, 'upcoming', 'category');
-       wp_redirect(home_url('/nursing-dashboard/'));
-    exit();
-}
-    wp_reset_postdata();
-
-    return $output;
-}
-add_shortcode('display_upcoming_appointments', 'display_upcoming_from_category_shortcode');
-
-
-
- 
- ////////////////////// Previous Posts///////////////////////////
-
-function display_previous_from_category_shortcode($atts) {
-    $atts = shortcode_atts(
-        array(
-            'category' => 'pervious',
-            'count' => 5,
-        ),
-        $atts,
-        'display_previous_appointments'
-    );
-
-    $args = array(
-        'category_name' => $atts['category'],
-        'posts_per_page' => $atts['count'],
-    );
-
-    $posts_query = new WP_Query($args);
-
-    $output = '';
-    if ($posts_query->have_posts()) {
-        $output .= '<div>';
-        $output .= '<ul style="padding: 5; color: black;">';
-        while ($posts_query->have_posts()) {
-            $posts_query->the_post();
-            $output .= '<li><a  style="color: black; font-siza: 15px"  href="' . get_permalink() . '">' . get_the_title() . '</a></li>';
-        }
-        $output .= '</ul>';
-        $output .= '</div>';
-    } else {
-        $output .= '<p style="color: #00D084; text-align: center;">You have no previous appointments.</p>';
-    }
-
-    wp_reset_postdata();
-
-    return $output;
-}
-add_shortcode('display_previous_appointments', 'display_previous_from_category_shortcode');
-
-
- //////////////////////////////////////////////////////////////////////////////
-        
         
             
-  /*          
-            
-  //create table in database
-  function create_custom_form_data_table() {
-    global $wpdb;
-    $charset_collate = $wpdb->get_charset_collate();
-    $table_name = $wpdb->prefix . 'custom_form_data';
-
-    $sql = "CREATE TABLE IF NOT EXISTS $table_name (
-        id mediumint(9) NOT NULL AUTO_INCREMENT,
-        submission_id mediumint(9) NOT NULL,
-        form_id mediumint(9) NOT NULL,
-        field1 varchar(255) DEFAULT '' NOT NULL,
-        field2 varchar(255) DEFAULT '' NOT NULL,
-        submission_date datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-        PRIMARY KEY (id)
-    ) $charset_collate;";
-
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    dbDelta($sql);
-}
-add_action('after_setup_theme', 'create_custom_form_data_table');
-
-
-
- // Retrieve form submission data from Forminator
-function store_forminator_form_data() {
-    global $wpdb;
-    $form_id = 1076; 
-    $submissions = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}frm_items WHERE form_id = %d", $form_id));
-
-    // Insert data into custom table
-    foreach ($submissions as $submission) {
-        $data_to_insert = array(
-            'submission_id' => $submission->id,
-            'form_id' => $form_id,
-            'field1' => $submission->field_name1,
-            'field2' => $submission->field_name2,
-            'submission_date' => $submission->created_at
-            
-        );
-
-        $wpdb->insert('wp_custom_form_data', $data_to_insert);
-    }
-}
-add_action('after_setup_theme', 'store_forminator_form_data');
-*/
+ 
 /////////////////////////////////////////////////////////////////
 // add_shortcode('mas', 'massage');
 
@@ -705,6 +403,7 @@ add_action('after_setup_theme', 'store_forminator_form_data');
 ///////////////////////////////////////////////////////////////////////////////
 add_shortcode("show","showDoctor");
 function showDoctor(){
+	
 	error_reporting(E_ERROR | E_PARSE);
 ob_start();
 	global $wpdb;
@@ -713,14 +412,18 @@ $args = array(
 );
 	$users = get_users( $args );
 //    print_r($users);
-// 	print_r($users);
-   echo'<div class="e-con-inner"style="display: flex;">';
+ 	//print_r($users);
+   echo'<div class="e-con-inner"style="display: flex; justify-content: space-between; ">';
 
 	foreach ($users as $user) {
+		
     $name = $user->user_login;
     $id = $user->ID;
     $id = (int) $id;
     $data = get_user_meta($id);
+	$user_status = get_user_meta($id, 'user_status', true);
+
+          
 // 		print_r($data);
 	$url=$data['Img'][0];
 		
@@ -737,10 +440,10 @@ $form_url = add_query_arg( 'nurse_id', $id, home_url('/payment/') );
             <div class="elementor-element elementor-element-ae6a2c1 ha-card--top ha-card--tablet-top ha-card--mobile-top elementor-widget elementor-widget-ha-card happy-addon ha-card" data-id="ae6a2c1" data-element_type="widget" data-widget_type="ha-card.default">
                 <div class="elementor-widget-container">
                     <figure class="ha-card-figure">
- <img fetchpriority="high" decoding="async" width="600" height="398" src="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'"	class="attachment-large size-large wp-image-780" alt="" srcset="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'" sizes="(max-width: 200px) 100vw, 600px">
+ <img fetchpriority="high" decoding="async" width="100" height="300" src="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'"	class="attachment-large size-large wp-image-780" alt="" srcset="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'" sizes="(max-width: 200px) 100vw, 600px">
                     </figure>
                     <div class="ha-card-body">
-                        <h4 class="ha-card-title">' . $experince . '</h4>
+                        <h3 class="ha-card-title">' . $experince . 'year</h3>
                         <div class="ha-card-text">
                             <p>' . $Price . '</p>
                             <p>' . $name . '</p>
@@ -754,5 +457,92 @@ $form_url = add_query_arg( 'nurse_id', $id, home_url('/payment/') );
 }
 
 	echo '</div>';
-return ob_get_clean();	
+return ob_get_clean();
+    }
+
+
+function enqueue_custom_styles() {
+    // Replace 'your-style' with a unique handle for your style.
+    wp_enqueue_style( 'your-style', get_stylesheet_directory_uri() . '/css/custom.css');
+}
+add_action( 'wp_enqueue_scripts', 'enqueue_custom_styles' );
+///////////////////////////////////////////////////////////////////////////////////////////
+add_shortcode("all","showall");
+function showall(){
+    error_reporting(E_ERROR | E_PARSE);
+    ob_start();
+    global $wpdb;
+    $args = array(
+        'role'    => 'nurse'
+    );
+    $users = get_users( $args );
+
+    echo '<div class="e-con-inner" style="display: flex; justify-content: space-between; ">';
+
+    echo '<table>'; // Start table
+
+    // Table header
+
+ echo    '<tr>';
+   echo '<th>Name</th>';
+  echo  '<th>Experience</th>';
+   echo'<th>Price</th>';
+   echo '<th>Action</th>';
+	
+	echo'<th>Email</th>';
+ echo'<th>password</th>';
+	echo'<th>img</th>';
+	 echo'<th>cv</th>';
+  echo '<th>national id </th>';
+    echo'<th>Membership card</th>';
+   echo '<th>Practice license</th>';
+
+
+    foreach ($users as $user) {
+        $id = $user->ID;
+        $data = get_user_meta($id);
+        $name = $user->user_login;
+        $experience = isset($data['experience'][0]) ? $data['experience'][0] : '';
+        $price = isset($data['priCe'][0]) ? $data['priCe'][0] : '';
+			$url=$data['Img'][0];
+			$url2=$data['CV'][0];
+			$url3=$data['NID'][0];
+		   $url4=$data['MC'][0];
+		   $url5=$data['PL'][0];
+			um_fetch_user($id);
+ //  $img = um_get_avatar_uri(um_profile('profile_photo'),100);
+//$form_url = add_query_arg( 'nurse_id', $id, home_url('/payment/') );
+	//	$img=isset($data['Img'][0]) ? $data['Img'][0] : '';
+
+       // $form_url = add_query_arg('nurse_id', $id, home_url('/payment/'));
+		$email=isset($data['user_email'][0]) ? $data['user_email'][0] : '';
+		$password=isset($data['user_pass'][0]) ? $data['user_pass'][0] : '';
+		$cv=isset($data['CV'][0]) ? $data['CV'][0] : '';
+		$NID=isset($data['NID'][0]) ? $data['NID'][0] : '';
+		$MC=isset($data['MC'][0]) ? $data['MC'][0] : '';
+		$PL=isset($data['PL'][0]) ? $data['PL'][0] : '';
+
+        echo '<tr>';
+        echo '<td>' . $name . '</td>';
+        echo '<td>' . $experience . '</td>';
+        echo '<td>' . $price . '</td>';
+        echo '<td><a href="' . $form_url . '">Reserve</a></td>';
+
+		echo '<td>' . $email . '</td>';
+		echo '<td>' . $password . '</td>';
+		echo '<td><img src="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'" ></td>';
+   echo '<td><a href= "https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url2.'" ></a></td>';
+   echo '<td><a href="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url3.'" ></a></td>';
+	
+// 		echo '<td>' .$cv . '</td>';
+// 		echo '<td>' . $NID . '</td>';
+		echo '<td><img src="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url4.'" ></td>';
+			echo '<td><img src="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url5.'" ></td>';
+        echo '</tr>';
+    }
+
+    echo '</table>'; // End table
+
+    echo '</div>';
+    return ob_get_clean();
 }
