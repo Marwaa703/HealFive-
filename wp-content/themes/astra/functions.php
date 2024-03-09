@@ -413,7 +413,7 @@ $args = array(
 	$users = get_users( $args );
 //    print_r($users);
  	//print_r($users);
-   echo'<div class="e-con-inner"style="display: flex; justify-content: space-between; ">';
+   echo'<div class="e-con-inner" ">';
 
 	foreach ($users as $user) {
 		
@@ -422,7 +422,8 @@ $args = array(
     $id = (int) $id;
     $data = get_user_meta($id);
 	$user_status = get_user_meta($id, 'user_status', true);
-
+       $offer_id= $_GET["offer_id"];
+    $user_id= $_GET["user_id"];
           
 // 		print_r($data);
 	$url=$data['Img'][0];
@@ -430,7 +431,7 @@ $args = array(
 // 	echo "<img src='https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/$id/$url'>";	
 //     $name = isset($data['user_nicename'][0]) ? $name : ''; // Corrected spelling
     $experince = isset($data['experience'][0]) ? $data['experience'][0] : ''; // Corrected spelling
-    $Price = isset($data['priCe'][0]) ? $data['priCe'][0] : ''; // Corrected spelling
+   // $Price = isset($data['priCe'][0]) ? $data['priCe'][0] : ''; // Corrected spelling
 		um_fetch_user($id);
     $img = um_get_avatar_uri(um_profile('profile_photo'),100);
 //       echo "<img src='$img'>";
@@ -440,16 +441,18 @@ $form_url = add_query_arg( 'nurse_id', $id, home_url('/payment/') );
             <div class="elementor-element elementor-element-ae6a2c1 ha-card--top ha-card--tablet-top ha-card--mobile-top elementor-widget elementor-widget-ha-card happy-addon ha-card" data-id="ae6a2c1" data-element_type="widget" data-widget_type="ha-card.default">
                 <div class="elementor-widget-container">
                     <figure class="ha-card-figure">
- <img fetchpriority="high" decoding="async" width="100" height="300" src="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'"	class="attachment-large size-large wp-image-780" alt="" srcset="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'" sizes="(max-width: 200px) 100vw, 600px">
+ <img fetchpriority="high" decoding="async" width="100" height="100" src="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'"	class="attachment-large size-large wp-image-780" alt="" srcset="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'" sizes="(max-width: 200px) 100vw, 600px">
                     </figure>
                     <div class="ha-card-body">
-                        <h3 class="ha-card-title">' . $experince . 'year</h3>
+                        <h4 class="ha-card-title">' . $experince . ' years of experience</h4>
                         <div class="ha-card-text">
-                            <p>' . $Price . '</p>
                             <p>' . $name . '</p>
                         </div>
-                        <a class="ha-btn" href="'. $form_url .'"><span class="ha-btn-text">Reserve</span></a>
-                            
+                        
+                        <a class="button" href="?offer='.$offer_id.'&nurse_id='.$id.'&user_id='.$user_id.'"> Reserve </a>
+                       
+                        
+                                       
                     </div>
                 </div>
             </div>
@@ -460,12 +463,33 @@ $form_url = add_query_arg( 'nurse_id', $id, home_url('/payment/') );
 return ob_get_clean();
     }
 
+if(isset($_GET["offer"])){
+$update_id=$_GET["nurse_id"];
+$update_offer=$_GET["offer"];
+$update_user=$_GET["user_id"];
+$wpdb-> update("wp_nurse_offers",["nurse_id"=>$update_id],["id"=>$update_offer], ["user_id"=>$update_user]);
+echo"updat";
+ wp_redirect(home_url('/payment/'));
+
+}
+
+
+
 
 function enqueue_custom_styles() {
-    // Replace 'your-style' with a unique handle for your style.
-    wp_enqueue_style( 'your-style', get_stylesheet_directory_uri() . '/css/custom.css');
+ //wp_enqueue_style( 'custom-style', get_template_directory_uri() . '/custom-style.css' );	
+     wp_enqueue_style( 'custom-style', get_template_directory_uri() . '/css/custom.css' );
 }
 add_action( 'wp_enqueue_scripts', 'enqueue_custom_styles' );
+
+
+
+
+// function enqueue_custom_styles() {
+//     // Replace 'your-style' with a unique handle for your style.
+//     wp_enqueue_style( 'your-style', get_template_directory_uri() . '/css/custom.css');
+// }
+// add_action( 'wp_enqueue_scripts', 'enqueue_custom_styles' );
 ///////////////////////////////////////////////////////////////////////////////////////////
 add_shortcode("all","showall");
 function showall(){
@@ -473,10 +497,12 @@ function showall(){
     ob_start();
     global $wpdb;
     $args = array(
-        'role'    => 'nurse'
+        'role'    => 'nurse',
+		'meta_key'      =>  'account_status',
+    'meta_value'    =>  'approved'
     );
     $users = get_users( $args );
-
+// 	print_r($users);
     echo '<div class="e-con-inner" style="display: flex; justify-content: space-between; ">';
 
     echo '<table>'; // Start table
@@ -487,10 +513,10 @@ function showall(){
    echo '<th>Name</th>';
   echo  '<th>Experience</th>';
    echo'<th>Price</th>';
-   echo '<th>Action</th>';
+ //  echo '<th>Action</th>';
 	
 	echo'<th>Email</th>';
- echo'<th>password</th>';
+//  echo'<th>password</th>';
 	echo'<th>img</th>';
 	 echo'<th>cv</th>';
   echo '<th>national id </th>';
@@ -515,8 +541,8 @@ function showall(){
 	//	$img=isset($data['Img'][0]) ? $data['Img'][0] : '';
 
        // $form_url = add_query_arg('nurse_id', $id, home_url('/payment/'));
-		$email=isset($data['user_email'][0]) ? $data['user_email'][0] : '';
-		$password=isset($data['user_pass'][0]) ? $data['user_pass'][0] : '';
+		$email=isset($user->user_email) ? $user->user_email : '';
+		//$password=isset($data['user_pass']) ? $data['user_pass'] : '';
 		$cv=isset($data['CV'][0]) ? $data['CV'][0] : '';
 		$NID=isset($data['NID'][0]) ? $data['NID'][0] : '';
 		$MC=isset($data['MC'][0]) ? $data['MC'][0] : '';
@@ -526,13 +552,13 @@ function showall(){
         echo '<td>' . $name . '</td>';
         echo '<td>' . $experience . '</td>';
         echo '<td>' . $price . '</td>';
-        echo '<td><a href="' . $form_url . '">Reserve</a></td>';
+     //   echo '<td><a href="' . $form_url . '">Reserve</a></td>';
 
-		echo '<td>' . $email . '</td>';
-		echo '<td>' . $password . '</td>';
+    	echo '<td> '.$email.'</td>';
+		//echo '<td>' . $password . '</td>';
 		echo '<td><img src="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url.'" ></td>';
-   echo '<td><a href= "https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url2.'" ></a></td>';
-   echo '<td><a href="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url3.'" ></a></td>';
+   echo '<td><a href= "https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url2.'" >cv</a></td>';
+   echo '<td><a href="https://dev-healfive.pantheonsite.io/wp-content/uploads/ultimatemember/'.$id.'/'.$url3.'" >N_id</a></td>';
 	
 // 		echo '<td>' .$cv . '</td>';
 // 		echo '<td>' . $NID . '</td>';

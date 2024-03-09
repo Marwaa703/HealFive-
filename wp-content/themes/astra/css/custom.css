@@ -1,78 +1,76 @@
+ 
 
 
+.e-con-inner {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 20px !important;
+    justify-content: space-between !important;
+
+}
+.elementor-element-aebfe68{
+width:30% !important;
 
 	
 	
-
- .elementor-element.elementor-element-aebfe68 ,  
-.e-con-inner{ 
-    box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between; 
-    margin: 0 ;
-/* 	align-items: center; */
-
 }
-
-
-/* Style for each card */ 
-.elementor-element.elementor-element-ae6a2c1    {
- box-sizing: border-box;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-	width: calc(25% - 20px);
-    margin:0 10px;      /* إعادة إضافة هوامش للكاردات */
-    text-align: center;
-	 
-}
-
-/* Style for the card image */
- .ha-card-figure img {
+.ha-card--top {
     width: 100%;
-    height: 100%;
-    border-bottom: 1px solid #ddd;
-    border-radius: 10px;
+	height:60vh;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+	border:solid 2px green;
 }
 
-/* Style for the card body */
-.ha-card-body {
-    padding: 15px;
-}
 
-/* Style for the card title */
-.ha-card-title {
+.ha-card-figure {
     margin: 0;
-    font-size: 20px;
-    font-weight: bold;
-    color: #333;
+		border-radius:20%;
+
 }
 
-/* Style for the card text */
-.ha-card-text p {
-    margin: 10px 0;
-    font-size: 20px;
+.ha-card-figure img {
+    width: 100%;
+    height: 30vh;
+    object-fit: cover;
+}
+
+.ha-card-body {
+    padding: 20px;
+    background-color: #f9f9f9;
+     height:50vh;
+}
+
+.ha-card-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #333;
+	text-align:center;
+}
+
+.ha-card-text {
+	text-align:center;
+    margin-bottom: 15px;
     color: #666;
 }
 
-/* Style for the reserve button */
-.ha-btn {
-    background-color: #49A38B;
-    color: #fff;
-    padding: 10px 10px;
-    border-radius: 10%;
-    text-decoration: none;
+.button {
     display: inline-block;
-    margin-top: 10px;
-	//width:15%;
+    padding: 10px 20px;
+    background-color: #02833E;
+    color: #fff;
+    text-decoration: none;  
+    border-radius: 10px;
     transition: background-color 0.3s;
+    margin-left:33%;
 }
 
-.ha-btn:hover {
-    background-color: #357f66;
+.button:hover {
+    background-color: #DDF3E0;
+	color:#02833E;
 }
 
+
+
+ 

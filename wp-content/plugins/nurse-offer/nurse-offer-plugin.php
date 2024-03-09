@@ -1,7 +1,9 @@
 <?php
 /*
 Plugin Name: Nurse Offer
-Description: Allows patients to enter their case via a form, with the form information being stored in a custom database table.
+Description: Allows patients to enter their case via a form, with the form information being stored in a custom table.
+Version: 1.0.0
+Author: Healfive Team.
 */
 
 
@@ -39,11 +41,12 @@ register_activation_hook(__FILE__, 'create_cases_table');
 function create_nurse_offer_table()
 {
     global $wpdb;
-    $table_name = $wpdb->prefix . 'noffers';
+    $table_name = $wpdb->prefix . 'nurse_offers';
     $charset_collate = $wpdb->get_charset_collate();
     $sql = "CREATE TABLE IF NOT EXISTS $table_name (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
         nurse_id bigint(20) unsigned,
+        user_id bigint(20) unsigned,
         patient_name varchar(255) NOT NULL,
         gender varchar(255) NOT NULL,
         patient_case varchar(255) NOT NULL,
@@ -196,55 +199,72 @@ function process_nurse_offer_form()
 {
     if (isset($_POST['submit_nurse_offer'])) {
         global $wpdb;
-        $offer_table_name = $wpdb->prefix . 'noffers';
-        // Sanitize input data
-        $patient_name = sanitize_text_field($_POST['patient_name']);
-        $gender = sanitize_text_field($_POST['gender']);
-        $patient_case = sanitize_text_field($_POST['patient_case']);
-        $case_description = sanitize_textarea_field($_POST['case_description']);
-        $other_diseases = isset($_POST['other_diseases']) ? sanitize_text_field($_POST['other_diseases']) : '';
-        $patient_address = sanitize_text_field($_POST['patient_address']);
-        $type_of_services = sanitize_text_field($_POST['type_of_services']);
-        $time_of_service = sanitize_text_field($_POST['time_of_service']);
-        $date_submitted = current_time('mysql');
 
-        // Get current user ID
-        $nurse_id = get_current_user_id();
+        // Check if the user is logged in
+        if (is_user_logged_in()) {
+            // Sanitize input data
+            $patient_name = sanitize_text_field($_POST['patient_name']);
+            $gender = sanitize_text_field($_POST['gender']);
+            $patient_case = sanitize_text_field($_POST['patient_case']);
+            $case_description = sanitize_textarea_field($_POST['case_description']);
+            $other_diseases = isset($_POST['other_diseases']) ? sanitize_text_field($_POST['other_diseases']) : '';
+            $patient_address = sanitize_text_field($_POST['patient_address']);
+            $type_of_services = sanitize_text_field($_POST['type_of_services']);
+            $time_of_service = sanitize_text_field($_POST['time_of_service']);
+            $date_submitted = current_time('mysql');
 
-        // Insert data into the database
-        $wpdb->insert(
-            $offer_table_name,
-            array(
-                'nurse_id' => $nurse_id,
-                'patient_name' => $patient_name,
-                'gender' => $gender,
-                'patient_case' => $patient_case,
-                'case_description' => $case_description,
-                'other_diseases' => $other_diseases,
-                'patient_address' => $patient_address,
-                'type_of_services' => $type_of_services,
-                'time_of_service' => $time_of_service,
-                'date_submitted' => $date_submitted,
-                'status' => 'pending'
-            ),
-            array(
-                '%d',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%s'
-            )
-        );
+            // Get current user ID
+            $user_id = get_current_user_id();
 
-        wp_redirect(home_url('/nurses/'));
-        //echo $wpdb->last_error;
-        exit;
+            // Insert data into the database
+            if ($user_id) {
+                $offer_table_name = $wpdb->prefix . 'nurse_offers';
+                $wpdb->insert(
+                    $offer_table_name,
+                    array(
+                        'nurse_id' => $user_id,
+                        'user_id' => $user_id, 
+                        'patient_name' => $patient_name,
+                        'gender' => $gender,
+                        'patient_case' => $patient_case,
+                        'case_description' => $case_description,
+                        'other_diseases' => $other_diseases,
+                        'patient_address' => $patient_address,
+                        'type_of_services' => $type_of_services,
+                        'time_of_service' => $time_of_service,
+                        'date_submitted' => $date_submitted,
+                        'status' => 'pending'
+                    ),
+                    array(
+                        '%d',
+                        '%d', 
+                        '%s',
+                        '%s',
+                        '%s',
+                        '%s',
+                        '%s',
+                        '%s',
+                        '%s',
+                        '%s',
+                        '%s',
+                        '%s'
+                    )
+                );
+
+                // Redirect after form submission with user_id included in URL
+                $id = $wpdb->insert_id;
+                wp_redirect(home_url('/nurses/?offer_id=' . $id . '&user_id=' . $user_id));
+                exit;
+            } else {
+                // User is not logged in
+                wp_redirect(wp_login_url());
+                exit;
+            }
+        } else {
+            // Redirect to login page if the user is not logged in
+            wp_redirect(wp_login_url());
+            exit;
+        }
     }
 }
 
@@ -256,13 +276,32 @@ add_shortcode('display_nurse_cases', 'display_nurse_cases_shortcode');
 function display_nurse_cases_shortcode($atts)
 {
     global $wpdb;
+  $output = '';
 
-    $table_name = $wpdb->prefix . 'noffers';
-    $cases = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'pending'");
+   // Get current user ID
+   
+   $user_id = get_current_user_id();
+   
+    if (!$user_id) {
+        return '<p>No user ID found.</p>';
+    }
+
+   $table_name = $wpdb->prefix . 'nurse_offers';
+$query = $wpdb->prepare("SELECT * FROM $table_name WHERE status = 'pending' AND nurse_id = %d", $user_id);
+
+
+    $cases = $wpdb->get_results($query);
+
+    // Debugging: Output the generated query and nurse ID
+    //error_log('Generated Query: ' . $wpdb->last_query);
+    //error_log('Nurse ID: ' . $user_id);
+
+    //$output = '<p>Current user ID: ' . $user_id . '</p>';
 
     if ($cases) {
-        // Initialize output variable
-        $output = '<style>
+        // Debugging: Output the number of cases retrieved
+        //$output .= '<p>Number of cases: ' . count($cases) . '</p>';
+        $output .= '<style>
             .nurse-case {
                 background-color: #f9f9f9;
                 padding: 20px;
@@ -294,13 +333,21 @@ function display_nurse_cases_shortcode($atts)
             }
 
             .btn-done {
-                background-color: #007bff;
+                background-color: #2ecc71;
                 color: #fff;
                 border: none;
                 border-radius: 5px;
                 padding: 8px 16px;
                 cursor: pointer;
+                font-size: 18px;
+                transition: background-color 0.3s;
+                margin-top: 10px;
+                margin-left:100px;
                 width:50%;
+            }
+
+            .btn-done:hover {
+                background-color: #0c1406;
             }
         </style>';
 
@@ -361,17 +408,23 @@ function display_nurse_cases_shortcode($atts)
             function confirmAction(caseId) {
                 if (confirm("Is This Service Done?")) {
                     document.getElementById("case-" + caseId).style.display = "none";
+                    var formData = new FormData();
+                    formData.append("action", "remove_nurse_case");
+                    formData.append("case_id", caseId);
+                    fetch("' . admin_url('admin-post.php') . '", {
+                        method: "POST",
+                        body: formData
+                    });
                 }
             }
         </script>';
+
     } else {
-        $output = '<p class="no-cases">No cases have been submitted yet.</p>';
+        $output .= '<p>No cases have been submitted yet.</p>';
     }
 
     return $output;
 }
-
-
 
 
 //////////////patient_card/////////////////////
@@ -380,16 +433,32 @@ add_shortcode('display_patient_cards', 'display_patient_cards_shortcode');
 function display_patient_cards_shortcode($atts)
 {
     global $wpdb;
+    
+    $output = ''; // Initialize $output variable
 
-    $offer_table_name = $wpdb->prefix . 'noffers';
+    // Get current user ID
+    $user_id = get_current_user_id();
+    if (!$user_id) {
+        return '<p>No user ID found.</p>';
+    }
 
-    $query = "SELECT * FROM $offer_table_name WHERE status = 'pending'";
+    $table_name = $wpdb->prefix . 'nurse_offers';
+    $query = $wpdb->prepare("SELECT * FROM $table_name WHERE status = 'pending' AND nurse_id = %d", $user_id);
+
     $cases = $wpdb->get_results($query);
 
-    // Check if there are any cases
+    // Debugging: Output the generated query and patient ID
+    // error_log('Generated Query: ' . $wpdb->last_query);
+    // error_log('Patient ID: ' . $user_id);
+    //$output = '<p>Current user ID: ' . $user_id . '</p>';
+
+//print_r($cases);
+
     if ($cases) {
-        // Initialize output variable
-        $output = '<div class="patient-cards">';
+        // Debugging: Output the number of cases retrieved
+        //$output .= '<p>Number of cases: ' . count($cases) . '</p>';
+        // Start patient cards container
+        $output .= '<div class="patient-cards">';
 
         // Loop through each case and format it as a card
         foreach ($cases as $case) {
@@ -430,24 +499,7 @@ function display_patient_cards_shortcode($atts)
 
         // Close the container div
         $output .= '</div>';
-
-        // Add JavaScript for confirmation
-        $output .= '<script>
-            function confirmAction(cardId) {
-                if (confirm("Is This Service Done?")) {
-                    document.getElementById("card-" + cardId).style.display = "none";
-                    var formData = new FormData();
-                    formData.append("action", "remove_patient_card");
-                    formData.append("card_id", cardId);
-                    fetch("' . admin_url('admin-post.php') . '", {
-                        method: "POST",
-                        body: formData
-                    });
-                }
-            }
-        </script>';
-
-        // Add CSS styles
+        
         $output .= '<style>
             .patient-cards {
                 display: flex;
@@ -456,36 +508,34 @@ function display_patient_cards_shortcode($atts)
             }
 
             .patient-card-wrapper {
-                width: 48%; 
+                width: calc(50% - 20px); /* Two cards in a row with margin */
                 margin-bottom: 20px;
             }
 
-           
-                .patient-card {
-    background-color: #edfbe2; 
-    color: black; 
-    font-family: Arial, sans-serif;
-    padding: 15px; 
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+            .patient-card {
+                background-color: #edfbe2;
+                color: black;
+                font-family: Arial, sans-serif;
+                padding: 15px;
+                border-radius: 10px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
 
-.patient-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
-}
+            .patient-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            }
 
-.patient-card p {
-    margin: 5px 0; /* Adjusted margin for paragraphs */
-}
+            .patient-card p {
+                margin: 5px 0;
+                font-size: 16px;
+            }
 
-.patient-card h4 {
-    margin-bottom: 10px; /* Adjusted margin for heading */
-}
-
-
-            
+            .patient-card h4 {
+                margin-bottom: 10px;
+                font-size: 20px;
+            }
 
             .btn {
                 display: inline-block;
@@ -530,9 +580,27 @@ function display_patient_cards_shortcode($atts)
                 background: #FFFFFF;
             }
         </style>';
+
+        // Add JavaScript for confirmation
+        $output .= '<script>
+            function confirmAction(cardId) {
+                if (confirm("Is This Service Done?")) {
+                    document.getElementById("card-" + cardId).style.display = "none";
+                    var formData = new FormData();
+                    formData.append("action", "remove_patient_card");
+                    formData.append("card_id", cardId);
+                    fetch("' . admin_url('admin-post.php') . '", {
+                        method: "POST",
+                        body: formData
+                    });
+                }
+            }
+        </script>';
+        
+
     } else {
         // If there are no cases, display a message
-        $output = '<p>No cases have been submitted yet.</p>';
+        $output .= '<p>No cases have been submitted yet.</p>';
     }
 
     return $output;
